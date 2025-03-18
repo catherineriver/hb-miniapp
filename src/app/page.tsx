@@ -5,36 +5,44 @@ import {
   Box,
   Button,
   Input,
-  Text,
   Textarea,
   Select,
   Field,
   createListCollection,
-  HStack,
   Portal,
   Heading
 } from "@chakra-ui/react";
 
 declare global {
   interface Window {
-    Telegram: any;
+    Telegram?: {
+      WebApp?: {
+        expand: () => void;
+        sendData: (data: string) => void;
+      };
+    };
   }
 }
 
-export default function Home() {
-  const [tg, setTg] = useState<any>(null);
+interface TelegramWebApp {
+  expand: () => void;
+  sendData: (data: string) => void;
+}
 
+
+export default function Home() {
+  const [tg, setTg] = useState<TelegramWebApp | null>(null);
   const [title, setTitle] = useState("");
   const [topic, setTopic] = useState("");
-  const [format, setFormat] = useState("");
+  const [format, setFormat] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
   const [fee, setFee] = useState("");
   const [deadline, setDeadline] = useState("");
   const isFormValid = title && topic && format && description && budget && fee && deadline;
   useEffect(() => {
+
     if (window.Telegram?.WebApp) {
       const webApp = window.Telegram.WebApp;
       webApp.expand();
@@ -104,7 +112,10 @@ export default function Home() {
         </Box>
 
         <Box my={2}>
-          <Select.Root collection={formats}>
+          <Select.Root collection={formats}
+           value={format}
+           onValueChange={(e) => setFormat(e.value)}
+          >
             <Select.Label>Выберите формат</Select.Label>
             <Select.Control >
               <Select.Trigger p={2} >
@@ -131,7 +142,10 @@ export default function Home() {
 
 
         <Box my={2}>
-          <Select.Root collection={tagsList} multiple>
+          <Select.Root collection={tagsList} multiple
+           value={tags}
+           onValueChange={(e) => setTags(e.value)}
+          >
             <Select.Label>Выберите тег</Select.Label>
             <Select.Control>
               <Select.Trigger p={2} >
